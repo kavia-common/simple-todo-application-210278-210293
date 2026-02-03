@@ -50,6 +50,17 @@ cursor.execute("""
     )
 """)
 
+# Create todos table for the todo application
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS todos (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
+        completed INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL
+    )
+""")
+
 # Insert initial data
 cursor.execute("INSERT OR REPLACE INTO app_info (key, value) VALUES (?, ?)", 
                ("project_name", "todo_database"))
@@ -67,7 +78,16 @@ cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name N
 table_count = cursor.fetchone()[0]
 
 cursor.execute("SELECT COUNT(*) FROM app_info")
-record_count = cursor.fetchone()[0]
+app_info_count = cursor.fetchone()[0]
+
+# Check if todos table exists before counting
+cursor.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='todos'")
+todos_table_exists = cursor.fetchone()[0] > 0
+if todos_table_exists:
+    cursor.execute("SELECT COUNT(*) FROM todos")
+    todos_count = cursor.fetchone()[0]
+else:
+    todos_count = 0
 
 conn.close()
 
@@ -115,7 +135,8 @@ print("")
 
 print("Database statistics:")
 print(f"  Tables: {table_count}")
-print(f"  App info records: {record_count}")
+print(f"  App info records: {app_info_count}")
+print(f"  Todos records: {todos_count}")
 
 # If sqlite3 CLI is available, show how to use it
 try:
